@@ -1,5 +1,29 @@
 import os
 import subprocess
+from google.genai import types
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Reads files in the specified directory and prints them, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The python file to execute, relative to the working directory.",
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                items=types.Schema(
+                    type=types.Type.STRING,
+                    description="Arguments to pass to the Python file.",
+                ),
+                description="Arguments to pass to the Python file.",
+            ),
+        },
+        required=["file_path"],
+    ),
+)
 
 def run_python_file(working_directory, file_path):
     # Resolve paths securely
@@ -24,6 +48,9 @@ def run_python_file(working_directory, file_path):
             return f"Process exited with code {result.returncode}"
         if result is None:
             return f"No output produced."
-        return f"STDOUT: {result.stdout} \nSTDERR: {result.stderr}"
+        if result.stdout:
+            return f"STDOUT: {result.stdout}"
+        if result.stderr:
+            return f"STDERR: {result.stderr}"
     except subprocess.CalledProcessError as e:
         return f'Error: executing python file: {e}'

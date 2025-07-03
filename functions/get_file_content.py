@@ -1,4 +1,21 @@
 import os
+from google.genai import types
+from config import MAX_CHARS
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description=f"Reads files in the specified directory and prints the first {MAX_CHARS} characters, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The file to read from, relative to the working directory. If empty, prints out file is empty.",
+            ),
+        },
+        required=["file_path"],
+    ),
+)
 
 def get_file_content(working_directory, file_path):
     try:
@@ -12,8 +29,6 @@ def get_file_content(working_directory, file_path):
 
         if not os.path.isfile(full_path):
             return f'Error: File not found or is not a regular file: "{file_path}"'
-
-        MAX_CHARS = 10000
 
         with open(full_path, "r") as f:
             file_content_string = f.read(MAX_CHARS)
