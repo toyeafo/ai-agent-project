@@ -3,6 +3,7 @@ from functions.get_files_info import get_files_info, schema_get_files_info
 from functions.get_file_content import get_file_content, schema_get_file_content
 from functions.write_file import schema_write_file, write_file
 from functions.run_python import run_python_file, schema_run_python_file
+from config import WORKING_DIR
 
 available_functions = types.Tool(
     function_declarations=[
@@ -27,7 +28,9 @@ def call_function(function_call_part, verbose=False):
     }
 
     try:
-        result = function_map[function_call_part.name]("./calculator", **function_call_part.args)
+        args = dict(function_call_part.args)
+        args["working_directory"] = WORKING_DIR
+        result = function_map[function_call_part.name](**args)
     except KeyError:
         return types.Content(
             role="tool",
